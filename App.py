@@ -1,6 +1,6 @@
 import random
 from queue import Queue
-from tkinter import Tk, Canvas, Frame, BOTH, Button
+from tkinter import Tk, Canvas, Frame, BOTH, Button, Scale, HORIZONTAL, Label
 
 from math import cos, sin, radians
 
@@ -28,13 +28,33 @@ class FractalTree(Frame):
         self.parent = parent
         self.jobs = []
         self.delay = start_delay
-        self.start_len = start_length
         self.shift = 0
         self.initUI()
 
     def initUI(self):
         self.parent.title("Fractal Tree")
         self.pack(fill=BOTH, expand=1)
+
+        Label(self.master, text="Start Length:").place(x=10, y=canvas_height-80)
+
+        self.start_len = Scale(self.master, from_=0, to=100, orient=HORIZONTAL, length=300, command=self.redraw)
+        self.start_len.place(x=110, y=canvas_height-100)
+        self.start_len.set(start_length)
+
+        Label(self.master, text="Angle:").place(x=10, y=canvas_height-40)
+
+        self.change_a = Scale(self.master, from_=0, to=180, orient=HORIZONTAL, length=300, command=self.redraw)
+        self.change_a.place(x=110, y=canvas_height-60)
+        self.change_a.set(change_a)
+
+
+        Label(self.master, text="Flower Chance:").place(x=10, y=canvas_height)
+
+        self.flower_chance = Scale(self.master, from_=0, to=100, orient=HORIZONTAL, length=300, command=self.redraw)
+        self.flower_chance.place(x=110, y=canvas_height-20)
+        self.flower_chance.set(2)
+
+
         self.canvas = Canvas(self, width=canvas_width, height=canvas_height)
         b = Button(self.master, text="Redraw", command=self.redraw)
         b.pack()
@@ -42,25 +62,25 @@ class FractalTree(Frame):
         self.canvas.pack()
         self.canvas.create_line(canvas_width / 2, canvas_height - 100, canvas_width / 2, canvas_height, width=start_width)
 
-        self.branch(self.start_len, canvas_width / 2, canvas_height - 100, line_width=start_width)
+        self.branch(self.start_len.get(), canvas_width / 2, canvas_height - 100, line_width=start_width)
 
-    def redraw(self):
+    def redraw(self, *args):
         for job in self.jobs:
             self.after_cancel(job)
         self.jobs.clear()
         self.shift = 0
         self.canvas.delete('all')
         self.canvas.create_line(canvas_width / 2, canvas_height - 100, canvas_width / 2, canvas_height, width=start_width)
-        self.branch(self.start_len, canvas_width / 2, canvas_height - 100, line_width=start_width)
+        self.branch(self.start_len.get(), canvas_width / 2, canvas_height - 100, line_width=start_width)
 
     def branch(self, length, prevx, prevy, preva=-90, iteration=1, line_width=1):
         if length > 5 and line_width > 0:
             rn1 = random.randrange(left_branch_angle_change)
             rn2 = random.randrange(right_branch_angle_change)
-            x1 = length * cos(radians(preva + change_a + rn1)) + prevx
-            y1 = length * sin(radians(preva + change_a + rn1)) + prevy
-            x2 = length * cos(radians(preva - change_a + rn2)) + prevx
-            y2 = length * sin(radians(preva - change_a + rn2)) + prevy
+            x1 = length * cos(radians(preva + self.change_a.get() + rn1)) + prevx
+            y1 = length * sin(radians(preva + self.change_a.get() + rn1)) + prevy
+            x2 = length * cos(radians(preva - self.change_a.get() + rn2)) + prevx
+            y2 = length * sin(radians(preva - self.change_a.get() + rn2)) + prevy
             self.canvas.create_line(prevx, prevy, x1, y1, width=line_width)
             self.canvas.create_line(prevx, prevy, x2, y2, width=line_width)
 
@@ -71,10 +91,10 @@ class FractalTree(Frame):
             line_width -= 1
             self.shift += 1
 
-            if random.randrange(0, 100) > 100 - flower_chance:
+            if random.randrange(0, 100) > 100 - self.flower_chance.get():
                 self.flower(x1, y1, preva + change_a + rn1)
                 b_left_flower = True
-            if random.randrange(0, 100) > 100 - flower_chance:
+            if random.randrange(0, 100) > 100 - self.flower_chance.get():
                 self.flower(x2, y2, preva - change_a + rn2)
                 b_right_flower = True
 
