@@ -48,7 +48,7 @@ class FractalTree(Frame):
         for job in self.jobs:
             self.after_cancel(job)
         self.jobs.clear()
-        self.shift = 0  
+        self.shift = 0
         self.canvas.delete('all')
         self.canvas.create_line(canvas_width / 2, canvas_height - 100, canvas_width / 2, canvas_height, width=start_width)
         self.branch(self.start_len, canvas_width / 2, canvas_height - 100, line_width=start_width)
